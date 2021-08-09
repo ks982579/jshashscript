@@ -1,0 +1,138 @@
+/*
+  We make HashWord Object with all necessary Functions.
+  First we need to take in the password and output character values [char2Val()]
+    This requires transforming letters to character values [charVal()]
+  Off set digits with their own values so they can't be mapped back. 
+  Need map of all letters
+  One Function to call all other functions ;)
+*/
+let mypwd = "PassWord2021";
+
+const HashWord = {
+  charVal:(ltr)=>{
+    let cval = ltr.charCodeAt(0);
+    return cval;
+  },
+  totalChars: 25,
+  makeCharsArray: function(){
+    let carry = [];
+    for(let chCode = 33; chCode <= 126; chCode++){
+      carry.push(HashWord.charVal(chCode));
+    }
+    return carry;
+  },
+  makeHash: function(delta){
+    delta = HashWord.char2Vals(delta);//Array of Char Vals
+    let tdelta = HashWord.charSum(delta);//sum of digits
+    let myOff = HashWord.digSum(tdelta);
+    let primeArray = primeMaker(5,tdelta);//Array of prime numbers
+    delta = HashWord.valOffSet(delta,myOff);
+    delta = HashWord.makeBig(delta,primeArray);
+    console.log("sum of digits => "+myOff)
+    let sdelta = delta.join("");
+    console.log(sdelta)
+    console.log(sdelta.length/HashWord.totalChars)
+    let hashedPW = HashWord.makeString(sdelta)
+    console.log(hashedPW)
+  },
+  char2Vals: function(aStr){
+    //Creates array of values from characters
+    charValArray = [];
+    for(let ltrIn of aStr){
+      charValArray.push(HashWord.charVal(ltrIn))
+    }
+    return charValArray
+  },
+  charSum: function(theArray){
+    let btotal = 0;
+    for(let bval of theArray){
+      btotal += bval;
+    }
+    return btotal
+  },
+  digSum: function(aNum){
+    //give it total value and it gives sum of digits. 
+    let thedigits = [];
+    let ktotal = aNum+1;
+    let topVal = 9;
+    for(let xbc = 0; xbc <= topVal; xbc++){
+      let thepower = 10**(topVal-xbc);
+      let remains = ktotal%thepower;
+      if(remains !== ktotal){
+        let thepush = (ktotal-remains)/thepower;
+        thedigits.push(thepush)
+        ktotal = remains;
+      }
+    }
+    ktotal = 0;
+    for(let hval of thedigits){
+      ktotal += hval
+    }
+    return ktotal;
+  },
+  valOffSet: function(theArray,theOff){
+    let newArray = [];
+    for(let theval of theArray){
+      newArray.push(theval + theOff)
+    }
+    return newArray;
+  },
+  makeBig:function(charValArray,primeArray){
+    let bigArray = [];
+    let primelen = primeArray.length;
+    let midP = primeArray[Math.round(primelen/2)];
+    for(let lilVal of charValArray){
+      let newLV = HashWord.digSum(lilVal);
+      let newBV = primelen - newLV;
+      let lilP = primeArray[newLV]
+      let bigP = primeArray[newBV]
+      bigArray.push(lilVal*lilP*midP*bigP);
+    }
+    return bigArray;
+  },
+  makeString:function(numString){
+    let hashedPassword = "";
+    let totsLen = numString.length
+    let charactersLeft = HashWord.totalChars;
+    //Dig per Val should be changing
+    let digPerVal = 0;
+//     let allPossibleChars = HashWord.makeCharsArray();
+    
+//     for(let charCreated = 0; charCreated < HashWord.totalChars; charCreated++){
+//       charactersLeft -= charCreated
+//       digPerVal = Math.round(totsLen/charactersLeft)
+//       for(let xty =0; xty < numString.length; xty){
+//         console.log(xty)
+//       }
+//     }
+    return hashedPassword
+  }
+}
+
+function primeMaker(bmin,bmax){
+  const primeArray = [];
+  for(let bval = bmin; bval < bmax; bval++){
+    if(isPrime(bval)){
+      primeArray.push(bval);
+    }
+  }
+  return primeArray
+}
+
+function isPrime(aNumber){
+  let ahalf = Math.round(aNumber/2)+1
+  if(aNumber < 2){
+    return false;
+  }
+  for(let divis = 2; divis < ahalf; divis++){
+    if(aNumber%divis === 0){
+      return false;
+    }
+  }
+  return true
+};
+
+// console.log(primeMaker(15,200))
+
+HashWord.makeHash(mypwd)
+// console.log(10**10)
